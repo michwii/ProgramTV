@@ -12,5 +12,6 @@ exports.batchTVProgramFeeder = functions.https.onRequest((request, response) => 
 });
 
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
-  response.send("Hello from Firebase!");
+  var dialogflowLibrary = require("./dialogflowFirebaseFulfillment.js");
+  dialogflowLibrary.dialogflowFirebaseFulfillment(request, response);
 });

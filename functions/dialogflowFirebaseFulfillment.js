@@ -18,6 +18,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 * Function to handle v1 webhook requests from Dialogflow
 */
 function processV1Request (request, response) {
+  console.log("V1");
   let action = request.body.result.action; // https://dialogflow.com/docs/actions-and-parameters
   let parameters = request.body.result.parameters; // https://dialogflow.com/docs/actions-and-parameters
   let inputContexts = request.body.result.contexts; // https://dialogflow.com/docs/contexts
@@ -197,12 +198,22 @@ function processV2Request (request, response) {
   const actionHandlers = {
     // The default welcome intent has been matched, welcome the user (https://dialogflow.com/docs/events#default_welcome_intent)
     'input.welcome': () => {
-      sendResponse('Hello, Welcome to my Dialogflow agent!'); // Send simple response to user
+      sendResponse('Bite, Welcome to my Dialogflow agent!'); // Send simple response to user
     },
     // The default fallback intent has been matched, try to recover (https://dialogflow.com/docs/intents#fallback_intents)
     'input.unknown': () => {
       // Use the Actions on Google lib to respond to Google requests; for other requests use JSON
       sendResponse('I\'m having trouble, can you try that again?'); // Send simple response to user
+    },
+    'input.tvProgramGeneral': () => {
+      console.log("Log Custom");
+
+      let responseToUser = {
+        //fulfillmentMessages: richResponsesV2, // Optional, uncomment to enable
+        //outputContexts: [{ 'name': `${session}/contexts/weather`, 'lifespanCount': 2, 'parameters': {'city': 'Rome'} }], // Optional, uncomment to enable
+        fulfillmentText: 'Oh My Gosh I am a custom function! :-)' // displayed response
+      };
+      sendResponse(responseToUser);
     },
     // Default handler for unknown or undefined actions
     'default': () => {
@@ -296,3 +307,18 @@ const richResponsesV2 = [
     'card': richResponseV2Card
   }
 ];
+
+var getTVPrograms = (startingTime, channel, callback) => {
+  var tvProgram = db.collection('fr-tv-program');
+  var query = tvProgram.where('startingTime', '>=', startingTime).get();
+  query = query.tv.where('endingTime', '<', startingTime).get();
+  if(channel){
+    query = query.where('channel', '=', channel).get();
+  }
+  query.then(tvPrograms => {
+      callback(null, tvPrograms);
+  })
+  .catch(err => {
+      callback(err, null);
+  });
+};
