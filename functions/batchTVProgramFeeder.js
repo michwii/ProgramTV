@@ -1,21 +1,8 @@
-const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 var request = require('request');
 var parseString = require('xml2js').parseString;
 var async = require('async');
-
-//Checking on which environement we are.
-if(process.env.ENV === "DEV"){
-  //We are using the local computer
-  var serviceAccount = require("./secretKeyServiceAccount.json");
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-}else{ // Using Firebase function
-  admin.initializeApp(functions.config().firebase);
-}
-
-var db = admin.firestore();
+var tvProgramModel = require("./tvProgramModel");
 
 var runBatch = (callback) => {
   var currentDate = new Date();
@@ -67,7 +54,7 @@ var extractTVProgramFromRaw = (rawTVProgram) => {
 var storeAllTVPrograms = (allTVProgram, callback) => {
   var allRequests = [];
   for(var tvProgram of allTVProgram){
-    allRequests.push(storeSingleTVProgram.bind(null, tvProgram));
+    allRequests.push(tvProgramModel.storeSingleTVProgram.bind(null, tvProgram));
   }
   async.parallelLimit(allRequests, 20, function(err, results){
     if(err) throw err;
@@ -75,16 +62,7 @@ var storeAllTVPrograms = (allTVProgram, callback) => {
   });
 };
 
-var storeSingleTVProgram = (data, callback) => {
-  var tvProgramToStore = db.collection('fr-tv-program').add(data).then(ref => {
-      return void callback(null, ref);
-  }).catch(err => {
-    throw err;
-  });
-};
-
 exports.runBatch = runBatch;
 exports.getRawTVProgram  = getRawTVProgram ;
 exports.extractTVProgramFromRaw = extractTVProgramFromRaw;
 exports.storeAllTVPrograms = storeAllTVPrograms;
-exports.storeSingleTVProgram = storeSingleTVProgram;

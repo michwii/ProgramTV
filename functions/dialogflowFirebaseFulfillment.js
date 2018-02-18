@@ -1,7 +1,12 @@
 'use strict';
-
 const functions = require('firebase-functions'); // Cloud Functions for Firebase library
 const DialogflowApp = require('actions-on-google').DialogflowApp; // Google Assistant helper library
+const mongoose = require('mongoose');
+mongoose.connect(process.env.DB_CONNECTION_STRING);
+
+admin.initializeApp(functions.config().firebase);
+var db = admin.firestore();
+
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
@@ -194,6 +199,18 @@ function processV2Request (request, response) {
   let requestSource = (request.body.originalDetectIntentRequest) ? request.body.originalDetectIntentRequest.source : undefined;
   // Get the session ID to differentiate calls from different users
   let session = (request.body.session) ? request.body.session : undefined;
+
+  var startingTime = (parameters.startingTime) ? parameters.startingTime : new Date() ;
+  var channel = parameters.channel;
+
+  console.log(channel);
+  console.log(startingTime);
+
+  getTVPrograms(parameters.startingTime, channel, function(err, results){
+    if(err) throw err;
+    console.log(results);
+  });
+
   // Create handlers for Dialogflow actions as well as a 'default' handler
   const actionHandlers = {
     // The default welcome intent has been matched, welcome the user (https://dialogflow.com/docs/events#default_welcome_intent)
@@ -206,8 +223,6 @@ function processV2Request (request, response) {
       sendResponse('I\'m having trouble, can you try that again?'); // Send simple response to user
     },
     'input.tvProgramGeneral': () => {
-      console.log("Log Custom");
-
       let responseToUser = {
         //fulfillmentMessages: richResponsesV2, // Optional, uncomment to enable
         //outputContexts: [{ 'name': `${session}/contexts/weather`, 'lifespanCount': 2, 'parameters': {'city': 'Rome'} }], // Optional, uncomment to enable
@@ -307,18 +322,3 @@ const richResponsesV2 = [
     'card': richResponseV2Card
   }
 ];
-
-var getTVPrograms = (startingTime, channel, callback) => {
-  var tvProgram = db.collection('fr-tv-program');
-  var query = tvProgram.where('startingTime', '>=', startingTime).get();
-  query = query.tv.where('endingTime', '<', startingTime).get();
-  if(channel){
-    query = query.where('channel', '=', channel).get();
-  }
-  query.then(tvPrograms => {
-      callback(null, tvPrograms);
-  })
-  .catch(err => {
-      callback(err, null);
-  });
-};
