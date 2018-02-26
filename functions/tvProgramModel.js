@@ -40,6 +40,10 @@ var getTVPrograms = (startingTime, channel, callback) => {
   }
   request.exec(callback);
 };
+var getAllTVPrograms = (callback) => {
+  var request = tvProgramModel.find();
+  request.exec(callback);
+};
 
 var closeConnection = () => {
   mongoose.connection.close();
@@ -47,4 +51,5 @@ var closeConnection = () => {
 
 exports.storeSingleTVProgram = storeSingleTVProgram;
 exports.getTVPrograms = getTVPrograms;
+exports.getAllTVPrograms = getAllTVPrograms;
 exports.closeConnection = closeConnection;

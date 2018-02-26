@@ -38,7 +38,9 @@ var extractTVProgramFromRaw = (rawTVProgram) => {
 
     var currentDate = new Date();
     //We create a dateString in full format in order to add at the end of the constructor the GMT time zone.
-    var dateStringFullFormat = currentDate.getFullYear()+"-"+currentDate.getMonth() + "-" + currentDate.getDate() + "T" + hourProgram.substring(0,2) + ":"+ hourProgram.substring(3,5) +":00+01:00");
+    var monthInTwoDigits = (currentDate.getMonth()+1 < 10) ? "0" + (currentDate.getMonth()+1) : (currentDate.getMonth()+1);
+    var dateInTwoDigits = (currentDate.getDate() < 10) ? "0" + currentDate.getDate() : currentDate.getDate();
+    var dateStringFullFormat = currentDate.getFullYear() + "-" + monthInTwoDigits + "-" + dateInTwoDigits + "T" + hourProgram.substring(0,2) + ":" + hourProgram.substring(3,5) +":00+01:00";
     tvProgram.startingTime = new Date(dateStringFullFormat);
 
     if(previousProgram !== null && previousProgram.channel === tvProgram.channel){
