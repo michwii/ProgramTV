@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
-const functions = require('firebase-functions');
+var functions;
 
 var connectionString;
 
 if(process.env.env === "dev"){ // We are running the code on my local computer
-  connectionString = process.env.db.connection_string;
+  connectionString = process.env['db.connection_string'];
 }else{ //We are running the code on Google Cloud Function
+  functions = require('firebase-functions');
   connectionString = functions.config().db.connection_string;
 }
 
@@ -32,11 +33,16 @@ var storeSingleTVProgram = (data, callback) => {
 };
 
 var getTVPrograms = (startingTime, channel, callback) => {
-
+  var request = tvProgramModel.find().where('startingTime').gte(startingTime);
+  //request = request.where('channel').ne("");
+  if(channel){
+    request = request.where('channel').equals(channel);
+  }
+  request.exec(callback);
 };
 
 var closeConnection = () => {
-
+  mongoose.connection.close();
 };
 
 exports.storeSingleTVProgram = storeSingleTVProgram;

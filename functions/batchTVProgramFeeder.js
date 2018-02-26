@@ -11,7 +11,11 @@ var runBatch = (callback) => {
   getRawTVProgram(url, function(err, rawTVProgram){
     if(err) throw err;
     var cleanTVprogram = extractTVProgramFromRaw(rawTVProgram);
-    storeAllTVPrograms(cleanTVprogram, callback);
+    storeAllTVPrograms(cleanTVprogram, function(err, results){
+      if(err) throw err;
+      tvProgramModel.closeConnection();
+      callback(err, null);
+    });
   });
 }
 
@@ -33,7 +37,9 @@ var extractTVProgramFromRaw = (rawTVProgram) => {
     var hourProgram = tvProgram.title[0].substring(tvProgram.title[0].indexOf('|')+2, tvProgram.title[0].lastIndexOf('|')-1);
 
     var currentDate = new Date();
-    tvProgram.startingTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hourProgram.substring(0,2), hourProgram.substring(3,5));
+    //We create a dateString in full format in order to add at the end of the constructor the GMT time zone.
+    var dateStringFullFormat = currentDate.getFullYear()+"-"+currentDate.getMonth() + "-" + currentDate.getDate() + "T" + hourProgram.substring(0,2) + ":"+ hourProgram.substring(3,5) +":00+01:00");
+    tvProgram.startingTime = new Date(dateStringFullFormat);
 
     if(previousProgram !== null && previousProgram.channel === tvProgram.channel){
       previousProgram.endingTime = tvProgram.startingTime;
