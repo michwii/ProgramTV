@@ -10,7 +10,7 @@ tvProgramModel.getAllTVPrograms(function(err, results){
 });
 */
 
-tvProgramModel.getTVPrograms(dateDebut, "France 2", (err, results) => {
+tvProgramModel.getTVPrograms(null, "Canal+", (err, results) => {
   if(err) throw err;
   console.log(results);
   console.log(tvProgramModel.getFrTvProgramOrder(results[0].channel));

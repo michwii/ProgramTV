@@ -35,6 +35,17 @@ var storeSingleTVProgram = (data, callback) => {
 };
 
 var getTVPrograms = (startingTime, channel, callback) => {
+  if(!startingTime){
+    var toNightDate = new Date();
+    var currentDate = new Date();
+    toNightDate.setHours(22,00,00);//Lookout depends on the country and time zone
+    if(currentDate.getTime() <= toNightDate.getTime()){
+      startingTime = toNightDate;
+    }else{
+      startingTime = currentDate;
+    }
+    console.log(startingTime);
+  }
   var request = tvProgramModel.find().where('startingTime').gte(startingTime);
   request = request.where('order').gte(0);
   if(channel){
