@@ -2,16 +2,16 @@ const functions = require('firebase-functions');
 var request = require('request');
 var parseString = require('xml2js').parseString;
 var async = require('async');
-var tvProgramModel = require("./tvProgramModel");
+var tvProgramModel = require("./models/tvProgramModel");
 
 var runBatch = (callback) => {
   var currentDate = new Date();
   var stringDaysForRSSRequest = (currentDate.getDate() < 10 ? '0' : '') + currentDate.getDate() + '-' + (currentDate.getMonth() < 10 ? '0' : '') + (currentDate.getMonth() + 1) + '-' + currentDate.getFullYear();
   var url = "https://webnext.fr/epg_cache/programme-tv-rss_"+ stringDaysForRSSRequest +".xml";
-  getRawTVProgram(url, function(err, rawTVProgram){
+  getRawTVProgram(url, (err, rawTVProgram) =>{
     if(err) throw err;
     var cleanTVprogram = extractTVProgramFromRaw(rawTVProgram);
-    storeAllTVPrograms(cleanTVprogram, function(err, results){
+    storeAllTVPrograms(cleanTVprogram, (err, results) => {
       if(err) throw err;
       tvProgramModel.closeConnection();
       callback(err, null);
@@ -20,9 +20,9 @@ var runBatch = (callback) => {
 }
 
 var getRawTVProgram = (url, callback) => {
-  request.get(url, function(err, response, body){
+  request.get(url, (err, response, body) => {
     if(err) throw err;
-    parseString(body, function (err, result) {
+    parseString(body, (err, result) => {
       if(err) throw err;
       var rawTVProgram = result.rss.channel[0].item;
       callback(err, rawTVProgram);
@@ -54,6 +54,9 @@ var extractTVProgramFromRaw = (rawTVProgram) => {
     delete tvProgram.title;
     delete tvProgram.comments;
 
+    //We add the order of the channel in order to present them to the user in order.
+    tvProgram.order = tvProgramModel.getFrTvProgramOrder(tvProgram.channel);
+
     previousProgram = tvProgram;
   }
   return rawTVProgram;
@@ -64,7 +67,7 @@ var storeAllTVPrograms = (allTVProgram, callback) => {
   for(var tvProgram of allTVProgram){
     allRequests.push(tvProgramModel.storeSingleTVProgram.bind(null, tvProgram));
   }
-  async.parallelLimit(allRequests, 20, function(err, results){
+  async.parallelLimit(allRequests, 20, (err, results) => {
     if(err) throw err;
     callback(err, results);
   });

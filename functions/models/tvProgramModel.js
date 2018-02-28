@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+var tvProgramOrder = require('./../config/tvProgramOrder');
 var functions;
 
 var connectionString;
@@ -22,7 +23,8 @@ var tvProgramSchema = new Schema({
   startingTime: Date,
   programName: String,
   rating: String,
-  endingTime: Date
+  endingTime: Date,
+  order : Number
 });
 
 var tvProgramModel = mongoose.model('fr-tv-program', tvProgramSchema);
@@ -34,14 +36,27 @@ var storeSingleTVProgram = (data, callback) => {
 
 var getTVPrograms = (startingTime, channel, callback) => {
   var request = tvProgramModel.find().where('startingTime').gte(startingTime);
-  //request = request.where('channel').ne("");
+  request = request.where('order').gte(0);
   if(channel){
     request = request.where('channel').equals(channel);
   }
-  request.exec(callback);
+  request = request.sort('channel startingTime');
+  //request.exec(callback);
+  request.exec((err, tvProgramToFilter) => {
+    if(err) throw err;
+    var previousTvProgram = null;
+    var tvProgramToReturn = [];
+    for(var tvProgram of tvProgramToFilter){
+      if(!previousTvProgram || tvProgram.channel !== previousTvProgram.channel){
+        previousTvProgram = tvProgram;
+        tvProgramToReturn.push(tvProgram);
+      }
+    }
+    callback(err, tvProgramToReturn);
+  });
 };
 var getAllTVPrograms = (callback) => {
-  var request = tvProgramModel.find();
+  var request = tvProgramModel.find().where('order').gte(0);
   request.exec(callback);
 };
 
@@ -49,7 +64,17 @@ var closeConnection = () => {
   mongoose.connection.close();
 };
 
+var getFrTvProgramOrder = (channel) => {
+  for(var raw of tvProgramOrder.frTvProgramOrder){
+    console.log(raw);
+    if(raw.channel === channel)
+      return raw.order;
+  }
+  return -1;
+};
+
 exports.storeSingleTVProgram = storeSingleTVProgram;
 exports.getTVPrograms = getTVPrograms;
 exports.getAllTVPrograms = getAllTVPrograms;
 exports.closeConnection = closeConnection;
+exports.getFrTvProgramOrder = getFrTvProgramOrder;

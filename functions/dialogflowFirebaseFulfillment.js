@@ -1,18 +1,16 @@
 'use strict';
 const functions = require('firebase-functions'); // Cloud Functions for Firebase library
 const DialogflowApp = require('actions-on-google').DialogflowApp; // Google Assistant helper library
-var tvProgramModel = require('./tvProgramModel');
+var tvProgramModel = require('./models/tvProgramModel');
 
 
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
-  var dateDebut = new Date();
-  console.log(dateDebut.toString());
   if (request.body.result) {
-    processV1Request(request, response);
+    return processV1Request(request, response);
   } else if (request.body.queryResult) {
-    processV2Request(request, response);
+    return processV2Request(request, response);
   } else {
     console.log('Invalid Request');
     return response.status(400).end('Invalid Webhook Request (expecting v1 or v2 webhook request)');
@@ -202,7 +200,7 @@ function processV2Request (request, response) {
   var startingTime = (parameters.startingTime) ? parameters.startingTime : new Date() ;
   var channel = parameters.channel;
 
-  tvProgramModel.getTVPrograms(startingTime, channel, function(err, results){
+  tvProgramModel.getTVPrograms(startingTime, channel, (err, results) => {
     if(err) throw err;
     console.log(results.length);
     for(var tvProgram of results){

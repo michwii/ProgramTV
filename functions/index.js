@@ -5,7 +5,7 @@ const functions = require('firebase-functions');
 //
 exports.batchTVProgramFeeder = functions.https.onRequest((request, response) => {
   var batchTVProgramFeeder = require("./batchTVProgramFeeder.js");
-  batchTVProgramFeeder.runBatch(function(err, results){
+  batchTVProgramFeeder.runBatch((err, results) => {
     if(err) throw err;
     response.json({success : true});
   });
