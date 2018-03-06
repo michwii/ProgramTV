@@ -35,36 +35,16 @@ var storeSingleTVProgram = (data, callback) => {
 };
 
 var getTVPrograms = (startingTime, channel, callback) => {
-  if(!startingTime){
-    var toNightDate = new Date();
-    var currentDate = new Date();
-    toNightDate.setHours(22,00,00);//Lookout depends on the country and time zone
-    if(currentDate.getTime() <= toNightDate.getTime()){
-      startingTime = toNightDate;
-    }else{
-      startingTime = currentDate;
-    }
-    console.log(startingTime);
-  }
-  var request = tvProgramModel.find().where('startingTime').gte(startingTime);
+
+  var request = tvProgramModel.find().where('startingTime').lte(startingTime);
+  request = request.where("endingTime").gt(startingTime);
   request = request.where('order').gte(0);
-  if(channel){
+  if(channel || channel !== ""){
     request = request.where('channel').equals(channel);
   }
-  request = request.sort('channel startingTime');
-  //request.exec(callback);
-  request.exec((err, tvProgramToFilter) => {
-    if(err) throw err;
-    var previousTvProgram = null;
-    var tvProgramToReturn = [];
-    for(var tvProgram of tvProgramToFilter){
-      if(!previousTvProgram || tvProgram.channel !== previousTvProgram.channel){
-        previousTvProgram = tvProgram;
-        tvProgramToReturn.push(tvProgram);
-      }
-    }
-    callback(err, tvProgramToReturn);
-  });
+  request = request.sort('order');
+  request.exec(callback);
+
 };
 var getAllTVPrograms = (callback) => {
   var request = tvProgramModel.find().where('order').gte(0);

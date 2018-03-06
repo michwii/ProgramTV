@@ -197,16 +197,24 @@ function processV2Request (request, response) {
   // Get the session ID to differentiate calls from different users
   let session = (request.body.session) ? request.body.session : undefined;
 
-  var startingTime = (parameters.startingTime) ? parameters.startingTime : new Date() ;
+  var startingTime = parameters.startingTime ;
   var channel = parameters.channel;
 
-  tvProgramModel.getTVPrograms(startingTime, channel, (err, results) => {
-    if(err) throw err;
-    console.log(results.length);
-    for(var tvProgram of results){
-      console.log(tvProgram);
+  if(!startingTime){
+    var toNightDate = new Date();
+    var currentDate = new Date();
+    toNightDate.setHours(22,0,0);//Lookout depends on the country and time zone
+    if(currentDate.getTime() <= toNightDate.getTime()){
+      startingTime = toNightDate;
+    }else{
+      startingTime = currentDate;
     }
-    tvProgramModel.closeConnection();
+    console.log(startingTime);
+  }
+
+  tvProgramModel.getTVPrograms(startingTime, channel, (err, tvPrograms) => {
+    if(err) throw err;
+    //tvProgramModel.closeConnection();
     // Create handlers for Dialogflow actions as well as a 'default' handler
     const actionHandlers = {
       // The default welcome intent has been matched, welcome the user (https://dialogflow.com/docs/events#default_welcome_intent)
@@ -220,7 +228,7 @@ function processV2Request (request, response) {
       },
       'input.tvProgramGeneral': () => {
         let responseToUser = {
-          //fulfillmentMessages: richResponsesV2, // Optional, uncomment to enable
+          fulfillmentMessages: richResponsesV2, // Optional, uncomment to enable
           //outputContexts: [{ 'name': `${session}/contexts/weather`, 'lifespanCount': 2, 'parameters': {'city': 'Rome'} }], // Optional, uncomment to enable
           fulfillmentText: 'Oh My Gosh I am a custom function! :-)' // displayed response
         };
