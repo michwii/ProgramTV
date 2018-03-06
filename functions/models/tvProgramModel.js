@@ -73,8 +73,8 @@ var renderFulfillmentResponse = function(tvPrograms){
   };
   for(var tvProgram of tvPrograms){
     cardToReturn.simple_responses.simple_responses.push({
-      'text_to_speech': 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " il y a " + tvProgram.programName,
-      'display_text': 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " il y a " + tvProgram.programName
+      'text_to_speech': 'Sur ' + tvProgram.channel + " à " + (tvProgram.startingTime.getHours()-1) + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName,
+      'display_text': 'Sur ' + tvProgram.channel + " à " + (tvProgram.startingTime.getHours()-1) + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName
     });
   }
   console.log(cardToReturn);
