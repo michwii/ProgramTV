@@ -228,7 +228,7 @@ function processV2Request (request, response) {
       },
       'input.tvProgramGeneral': () => {
         let responseToUser = {
-          fulfillmentMessages: richResponsesV2, // Optional, uncomment to enable
+          fulfillmentMessages: tvProgramModel.renderFulfillmentResponse(tvPrograms), // Optional, uncomment to enable
           //outputContexts: [{ 'name': `${session}/contexts/weather`, 'lifespanCount': 2, 'parameters': {'city': 'Rome'} }], // Optional, uncomment to enable
           fulfillmentText: 'Oh My Gosh I am a custom function! :-)' // displayed response
         };

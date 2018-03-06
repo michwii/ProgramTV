@@ -64,8 +64,26 @@ var getFrTvProgramOrder = (channel) => {
   return -1;
 };
 
+var renderFulfillmentResponse = function(tvPrograms){
+  var cardToReturn = {
+    'platform': 'ACTIONS_ON_GOOGLE',
+    'simple_responses' : {
+      'simple_responses' : []
+    }
+  };
+  for(var tvProgram of tvPrograms){
+    cardToReturn.simple_responses.simple_responses.push({
+      'text_to_speech': 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " il y a " + tvProgram.programName,
+      'display_text': 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " il y a " + tvProgram.programName
+    });
+  }
+  console.log(cardToReturn);
+  return [cardToReturn];
+}
+
 exports.storeSingleTVProgram = storeSingleTVProgram;
 exports.getTVPrograms = getTVPrograms;
 exports.getAllTVPrograms = getAllTVPrograms;
 exports.closeConnection = closeConnection;
 exports.getFrTvProgramOrder = getFrTvProgramOrder;
+exports.renderFulfillmentResponse = renderFulfillmentResponse;

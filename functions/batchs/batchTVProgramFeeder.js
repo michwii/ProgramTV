@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 var request = require('request');
 var parseString = require('xml2js').parseString;
 var async = require('async');
-var tvProgramModel = require("./models/tvProgramModel");
+var tvProgramModel = require("./../models/tvProgramModel");
 
 var runBatch = (callback) => {
   var currentDate = new Date();
