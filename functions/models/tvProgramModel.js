@@ -65,19 +65,22 @@ var getFrTvProgramOrder = (channel) => {
 };
 
 var renderFulfillmentResponse = function(tvPrograms){
+
+  var simpleResponse = {
+    'ssml': "<speak>",
+    'display_text' : ""
+  };
+  for(var tvProgram of tvPrograms){
+    simpleResponse.ssml += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName + " <break time=\"1\" />",
+    simpleResponse.display_text += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName
+  }
+  simpleResponse.ssml += "</speak>";
   var cardToReturn = {
     'platform': 'ACTIONS_ON_GOOGLE',
     'simple_responses' : {
-      'simple_responses' : []
+      'simple_responses' : [simpleResponse]
     }
   };
-  for(var tvProgram of tvPrograms){
-    cardToReturn.simple_responses.simple_responses.push({
-      'text_to_speech': 'Sur ' + tvProgram.channel + " à " + (tvProgram.startingTime.getHours()-1) + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName,
-      'display_text': 'Sur ' + tvProgram.channel + " à " + (tvProgram.startingTime.getHours()-1) + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName
-    });
-  }
-  console.log(cardToReturn);
   return [cardToReturn];
 }
 
