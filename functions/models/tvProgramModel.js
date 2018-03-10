@@ -57,7 +57,6 @@ var closeConnection = () => {
 
 var getFrTvProgramOrder = (channel) => {
   for(var raw of tvProgramOrder.frTvProgramOrder){
-    console.log(raw);
     if(raw.channel === channel)
       return raw.order;
   }
@@ -68,20 +67,53 @@ var renderFulfillmentResponse = function(tvPrograms){
 
   var simpleResponse = {
     'ssml': "<speak>",
-    'display_text' : ""
+    'display_text' : "Voici le programme télé"
   };
-  for(var tvProgram of tvPrograms){
-    simpleResponse.ssml += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName + " <break time=\"1\" />",
-    simpleResponse.display_text += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName
+  var richResponse;
+  console.log(tvPrograms);
+  if(Array.isArray(tvPrograms) && tvPrograms.length > 1){
+    var itemsCarousel = [];
+    for(var tvProgram of tvPrograms){
+      simpleResponse.ssml += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName + " <break time=\"1\" />";
+      //simpleResponse.display_text += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName
+      itemsCarousel.push({
+          "info": {
+            "key": tvProgram._id
+          },
+          "title": tvProgram.channel,
+          "description": "A " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes() +" : "+ tvProgram.programName
+      });
+    }
+    richResponse = {
+      'platform': 'ACTIONS_ON_GOOGLE',
+      'carouselSelect': {
+        "items": itemsCarousel
+      }
+    };
+  }else{
+    tvPrograms = tvPrograms[0];
+    console.log(tvPrograms);
+    simpleResponse.ssml += 'Sur ' + tvPrograms.channel + " à " + tvPrograms.startingTime.getHours() + " heures "+ tvPrograms.startingTime.getMinutes()+ " il y a " + tvPrograms.programName ;
+    richResponse = {
+      "platform": "ACTIONS_ON_GOOGLE",
+      "basicCard": {
+        "title": tvPrograms.channel,
+        "subtitle": tvPrograms.startingTime.getHours() + " heures "+ tvPrograms.startingTime.getMinutes(),
+        "formattedText": tvPrograms.programName
+      }
+    }
   }
+
   simpleResponse.ssml += "</speak>";
-  var cardToReturn = {
+
+  var simpleResponses = {
     'platform': 'ACTIONS_ON_GOOGLE',
     'simple_responses' : {
       'simple_responses' : [simpleResponse]
     }
   };
-  return [cardToReturn];
+
+  return [simpleResponses, richResponse];
 }
 
 exports.storeSingleTVProgram = storeSingleTVProgram;
