@@ -3,7 +3,6 @@ const functions = require('firebase-functions'); // Cloud Functions for Firebase
 const DialogflowApp = require('actions-on-google').DialogflowApp; // Google Assistant helper library
 var tvProgramModel = require('./models/tvProgramModel');
 
-
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
@@ -275,57 +274,4 @@ function processV2Request (request, response) {
       }
     }
   });
-
-
 }
-const richResponseV2Card = {
-  'title': 'Title: this is a title',
-  'subtitle': 'This is an subtitle.  Text can include unicode characters including emoji 📱.',
-  'imageUri': 'https://developers.google.com/actions/images/badges/XPM_BADGING_GoogleAssistant_VER.png',
-  'buttons': [
-    {
-      'text': 'This is a button',
-      'postback': 'https://assistant.google.com/'
-    }
-  ]
-};
-const richResponsesV2 = [
-  {
-    'platform': 'ACTIONS_ON_GOOGLE',
-    'simple_responses': {
-      'simple_responses': [
-        {
-          'text_to_speech': 'Spoken simple response',
-          'display_text': 'Displayed simple response'
-        }
-      ]
-    }
-  },
-  {
-    'platform': 'ACTIONS_ON_GOOGLE',
-    'basic_card': {
-      'title': 'Title: this is a title',
-      'subtitle': 'This is an subtitle.',
-      'formatted_text': 'Body text can include unicode characters including emoji 📱.',
-      'image': {
-        'image_uri': 'https://developers.google.com/actions/images/badges/XPM_BADGING_GoogleAssistant_VER.png'
-      },
-      'buttons': [
-        {
-          'title': 'This is a button',
-          'open_uri_action': {
-            'uri': 'https://assistant.google.com/'
-          }
-        }
-      ]
-    }
-  },
-  {
-    'platform': 'FACEBOOK',
-    'card': richResponseV2Card
-  },
-  {
-    'platform': 'SLACK',
-    'card': richResponseV2Card
-  }
-];

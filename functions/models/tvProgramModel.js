@@ -82,14 +82,13 @@ var renderFulfillmentResponse = function(tvPrograms){
   if(tvPrograms.length > 1){
     var itemsCarousel = [];
     for(var tvProgram of tvPrograms){
-      simpleResponse.ssml += 'Sur ' + tvProgram.channel + " à " + (tvProgram.startingTime.getHours()+1) + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName + " <break time=\"1\" />";
-      //simpleResponse.display_text += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName
+      simpleResponse.ssml += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.toLocaleTimeString('fr-FR') + " il y a " + tvProgram.programName + " <break time=\"1\" />";
       itemsCarousel.push({
           "info": {
             "key": tvProgram._id
           },
           "title": tvProgram.channel,
-          "description": "A " + (tvProgram.startingTime.getHours()+1) + " heures "+ tvProgram.startingTime.getMinutes() +" : "+ tvProgram.programName
+          "description": "A " + tvProgram.startingTime.toLocaleTimeString('fr-FR') +" : "+ tvProgram.programName
       });
     }
     richResponse = {
@@ -101,12 +100,12 @@ var renderFulfillmentResponse = function(tvPrograms){
     responseToSend = [simpleResponses, richResponse];
   }else if (tvPrograms.length === 1){
     tvPrograms = tvPrograms[0];
-    simpleResponse.ssml += 'Sur ' + tvPrograms.channel + " à " + (tvPrograms.startingTime.getHours()+1) + " heures "+ tvPrograms.startingTime.getMinutes()+ " il y a " + tvPrograms.programName ;
+    simpleResponse.ssml += 'Sur ' + tvPrograms.channel + " à " + tvProgram.startingTime.toLocaleTimeString('fr-FR')+ " il y a " + tvPrograms.programName ;
     richResponse = {
       "platform": "ACTIONS_ON_GOOGLE",
       "basicCard": {
         "title": tvPrograms.channel,
-        "subtitle": (tvPrograms.startingTime.getHours()+1) + " heures "+ tvPrograms.startingTime.getMinutes(),
+        "subtitle": tvProgram.startingTime.toLocaleTimeString('fr-FR'),
         "formattedText": tvPrograms.programName
       }
     }
@@ -116,7 +115,6 @@ var renderFulfillmentResponse = function(tvPrograms){
     simpleResponse.display_text = "Pas de programme TV";
     responseToSend = [simpleResponses];
   }
-
   simpleResponse.ssml += "</speak>";
 
   return responseToSend;
