@@ -65,23 +65,31 @@ var getFrTvProgramOrder = (channel) => {
 
 var renderFulfillmentResponse = function(tvPrograms){
 
+  var responseToSend;
+  var richResponse;
+  //We fill up the following variables now whatever the response we will give
   var simpleResponse = {
     'ssml': "<speak>",
-    'display_text' : "Voici le programme télé"
+    'display_text' : "Voici le programme TV"
   };
-  var richResponse;
-  console.log(tvPrograms);
-  if(Array.isArray(tvPrograms) && tvPrograms.length > 1){
+  var simpleResponses = {
+    'platform': 'ACTIONS_ON_GOOGLE',
+    'simple_responses' : {
+      'simple_responses' : [simpleResponse]
+    }
+  };
+
+  if(tvPrograms.length > 1){
     var itemsCarousel = [];
     for(var tvProgram of tvPrograms){
-      simpleResponse.ssml += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName + " <break time=\"1\" />";
+      simpleResponse.ssml += 'Sur ' + tvProgram.channel + " à " + (tvProgram.startingTime.getHours()+1) + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName + " <break time=\"1\" />";
       //simpleResponse.display_text += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes()+ " il y a " + tvProgram.programName
       itemsCarousel.push({
           "info": {
             "key": tvProgram._id
           },
           "title": tvProgram.channel,
-          "description": "A " + tvProgram.startingTime.getHours() + " heures "+ tvProgram.startingTime.getMinutes() +" : "+ tvProgram.programName
+          "description": "A " + (tvProgram.startingTime.getHours()+1) + " heures "+ tvProgram.startingTime.getMinutes() +" : "+ tvProgram.programName
       });
     }
     richResponse = {
@@ -90,30 +98,28 @@ var renderFulfillmentResponse = function(tvPrograms){
         "items": itemsCarousel
       }
     };
-  }else{
+    responseToSend = [simpleResponses, richResponse];
+  }else if (tvPrograms.length === 1){
     tvPrograms = tvPrograms[0];
-    console.log(tvPrograms);
-    simpleResponse.ssml += 'Sur ' + tvPrograms.channel + " à " + tvPrograms.startingTime.getHours() + " heures "+ tvPrograms.startingTime.getMinutes()+ " il y a " + tvPrograms.programName ;
+    simpleResponse.ssml += 'Sur ' + tvPrograms.channel + " à " + (tvPrograms.startingTime.getHours()+1) + " heures "+ tvPrograms.startingTime.getMinutes()+ " il y a " + tvPrograms.programName ;
     richResponse = {
       "platform": "ACTIONS_ON_GOOGLE",
       "basicCard": {
         "title": tvPrograms.channel,
-        "subtitle": tvPrograms.startingTime.getHours() + " heures "+ tvPrograms.startingTime.getMinutes(),
+        "subtitle": (tvPrograms.startingTime.getHours()+1) + " heures "+ tvPrograms.startingTime.getMinutes(),
         "formattedText": tvPrograms.programName
       }
     }
+    responseToSend = [simpleResponses, richResponse];
+  }else{
+    simpleResponse.ssml += "Désolé mais je n'ai rien trouvé de pertinant. Peut-être qu'il est préférable que vous sortiez plutôt que de rester sur votre canapé";
+    simpleResponse.display_text = "Pas de programme TV";
+    responseToSend = [simpleResponses];
   }
 
   simpleResponse.ssml += "</speak>";
 
-  var simpleResponses = {
-    'platform': 'ACTIONS_ON_GOOGLE',
-    'simple_responses' : {
-      'simple_responses' : [simpleResponse]
-    }
-  };
-
-  return [simpleResponses, richResponse];
+  return responseToSend;
 }
 
 exports.storeSingleTVProgram = storeSingleTVProgram;
