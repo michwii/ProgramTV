@@ -82,13 +82,13 @@ var renderFulfillmentResponse = function(tvPrograms){
   if(tvPrograms.length > 1){
     var itemsCarousel = [];
     for(var tvProgram of tvPrograms){
-      simpleResponse.ssml += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.toLocaleTimeString('fr-FR') + " il y a " + tvProgram.programName + " <break time=\"1\" />";
+      simpleResponse.ssml += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.toLocaleTimeString('fr-FR', { hour12: false }) + " il y a " + tvProgram.programName + " <break time=\"1\" />";
       itemsCarousel.push({
           "info": {
             "key": tvProgram._id
           },
           "title": tvProgram.channel,
-          "description": "A " + tvProgram.startingTime.toLocaleTimeString('fr-FR') +" : "+ tvProgram.programName
+          "description": "A " + tvProgram.startingTime.toLocaleTimeString('fr-FR', { hour12: false }) +" : "+ tvProgram.programName
       });
     }
     richResponse = {
@@ -100,12 +100,12 @@ var renderFulfillmentResponse = function(tvPrograms){
     responseToSend = [simpleResponses, richResponse];
   }else if (tvPrograms.length === 1){
     tvPrograms = tvPrograms[0];
-    simpleResponse.ssml += 'Sur ' + tvPrograms.channel + " à " + tvProgram.startingTime.toLocaleTimeString('fr-FR')+ " il y a " + tvPrograms.programName ;
+    simpleResponse.ssml += 'Sur ' + tvPrograms.channel + " à " + tvProgram.startingTime.toLocaleTimeString('fr-FR', { hour12: false })+ " il y a " + tvPrograms.programName ;
     richResponse = {
       "platform": "ACTIONS_ON_GOOGLE",
       "basicCard": {
         "title": tvPrograms.channel,
-        "subtitle": tvProgram.startingTime.toLocaleTimeString('fr-FR'),
+        "subtitle": tvProgram.startingTime.toLocaleTimeString('fr-FR', { hour12: false }),
         "formattedText": tvPrograms.programName
       }
     }
