@@ -36,13 +36,19 @@ var storeSingleTVProgram = (data, callback) => {
 
 var getTVPrograms = (startingTime, channel, callback) => {
 
+  if(!startingTime){
+    startingTime = new Date();
+    startingTime.setUTCHours(19);
+  }
+
   var request = tvProgramModel.find().where('startingTime').lte(startingTime);
   request = request.where("endingTime").gt(startingTime);
   request = request.where('order').gte(0);
-  if(channel || channel !== ""){
+  if(channel && channel !== ""){
     request = request.where('channel').equals(channel);
   }
   request = request.sort('order');
+  request = request.limit(6);
   request.exec(callback);
 
 };
@@ -80,32 +86,29 @@ var renderFulfillmentResponse = function(tvPrograms){
   };
 
   if(tvPrograms.length > 1){
-    var itemsCarousel = [];
+    var formattedText = "";
     for(var tvProgram of tvPrograms){
-      simpleResponse.ssml += 'Sur ' + tvProgram.channel + " à " + tvProgram.startingTime.toLocaleTimeString('fr-FR', { hour12: false }) + " il y a " + tvProgram.programName + " <break time=\"1\" />";
-      itemsCarousel.push({
-          "info": {
-            "key": tvProgram._id
-          },
-          "title": tvProgram.channel,
-          "description": "A " + tvProgram.startingTime.toLocaleTimeString('fr-FR', { hour12: false }) +" : "+ tvProgram.programName
-      });
+      simpleResponse.ssml += 'Sur ' + tvProgram.channel + " : " + tvProgram.programName + " <break time=\"1\" />";
+      formattedText += "  **" + tvProgram.channel + "** à " + tvProgram.startingTime.toLocaleTimeString('fr-FR', { hour12: false, timeZone : 'Europe/Paris' }) + " : " + tvProgram.programName + ".  "; // Doble space = new line
     }
+
     richResponse = {
-      'platform': 'ACTIONS_ON_GOOGLE',
-      'carouselSelect': {
-        "items": itemsCarousel
+      "platform": "ACTIONS_ON_GOOGLE",
+      "basicCard": {
+        "title": "Programme TV",
+        "subtitle": "Ce soir",
+        "formattedText": formattedText
       }
-    };
+    }
     responseToSend = [simpleResponses, richResponse];
   }else if (tvPrograms.length === 1){
     tvPrograms = tvPrograms[0];
-    simpleResponse.ssml += 'Sur ' + tvPrograms.channel + " à " + tvProgram.startingTime.toLocaleTimeString('fr-FR', { hour12: false })+ " il y a " + tvPrograms.programName ;
+    simpleResponse.ssml += 'Sur ' + tvPrograms.channel + " à " + tvPrograms.startingTime.toLocaleTimeString('fr-FR', { hour12: false })+ " il y a " + tvPrograms.programName ;
     richResponse = {
       "platform": "ACTIONS_ON_GOOGLE",
       "basicCard": {
         "title": tvPrograms.channel,
-        "subtitle": tvProgram.startingTime.toLocaleTimeString('fr-FR', { hour12: false }),
+        "subtitle": tvPrograms.startingTime.toLocaleTimeString('fr-FR', { hour12: false, timeZone : 'Europe/Paris'}),
         "formattedText": tvPrograms.programName
       }
     }

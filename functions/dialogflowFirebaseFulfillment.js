@@ -198,11 +198,11 @@ function processV2Request (request, response) {
 
   var startingTime = parameters.startingTime ;
   var channel = parameters.channel;
-
+/*
   if(!startingTime){
     var toNightDate = new Date();
     var currentDate = new Date();
-    toNightDate.setHours(22,0,0);//Lookout depends on the country and time zone
+    toNightDate.setHours(22);//Lookout depends on the country and time zone
     if(currentDate.getTime() <= toNightDate.getTime()){
       startingTime = toNightDate;
     }else{
@@ -210,9 +210,10 @@ function processV2Request (request, response) {
     }
     console.log(startingTime);
   }
-
+*/
   tvProgramModel.getTVPrograms(startingTime, channel, (err, tvPrograms) => {
     if(err) throw err;
+
     //tvProgramModel.closeConnection();
     // Create handlers for Dialogflow actions as well as a 'default' handler
     const actionHandlers = {
@@ -225,11 +226,19 @@ function processV2Request (request, response) {
         // Use the Actions on Google lib to respond to Google requests; for other requests use JSON
         sendResponse('I\'m having trouble, can you try that again?'); // Send simple response to user
       },
-      'input.tvProgramGeneral': () => {
+      'input.tvProgram': () => {
         let responseToUser = {
-          fulfillmentMessages: tvProgramModel.renderFulfillmentResponse(tvPrograms), // Optional, uncomment to enable
+          fulfillmentMessages: tvProgramModel.renderFulfillmentResponse(tvPrograms),
           //outputContexts: [{ 'name': `${session}/contexts/weather`, 'lifespanCount': 2, 'parameters': {'city': 'Rome'} }], // Optional, uncomment to enable
-          fulfillmentText: 'Oh My Gosh I am a custom function! :-)' // displayed response
+          fulfillmentText: 'Voici le programme télé'
+        };
+        sendResponse(responseToUser);
+      },
+      'actions_intent_OPTION': () => {
+        let responseToUser = {
+          //fulfillmentMessages: tvProgramModel.renderFulfillmentResponse(tvPrograms),
+          //outputContexts: [{ 'name': `${session}/contexts/weather`, 'lifespanCount': 2, 'parameters': {'city': 'Rome'} }], // Optional, uncomment to enable
+          fulfillmentText: 'I am a response to an option' // displayed response
         };
         sendResponse(responseToUser);
       },
@@ -238,7 +247,7 @@ function processV2Request (request, response) {
         let responseToUser = {
           //fulfillmentMessages: richResponsesV2, // Optional, uncomment to enable
           //outputContexts: [{ 'name': `${session}/contexts/weather`, 'lifespanCount': 2, 'parameters': {'city': 'Rome'} }], // Optional, uncomment to enable
-          fulfillmentText: 'This is from Dialogflow\'s Cloud Functions for Firebase editor! :-)' // displayed response
+          fulfillmentText: 'Je suis la réponse par default' // displayed response
         };
         sendResponse(responseToUser);
       }
@@ -268,6 +277,7 @@ function processV2Request (request, response) {
         if (responseToUser.outputContexts) {
           responseJson.outputContexts = responseToUser.outputContexts;
         }
+
         // Send the response to Dialogflow
         console.log('Response to Dialogflow: ' + JSON.stringify(responseJson));
         response.json(responseJson);
