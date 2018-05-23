@@ -109,7 +109,10 @@ var renderFulfillmentResponse = function(tvPrograms){
       "basicCard": {
         "title": tvPrograms.channel,
         "subtitle": tvPrograms.startingTime.toLocaleTimeString('fr-FR', { hour12: false, timeZone : 'Europe/Paris'}),
-        "formattedText": tvPrograms.programName
+        "formattedText": tvPrograms.programName,
+        "image" : {
+          "accessibility_text" : "Description du programme télé."
+        }
       }
     }
     responseToSend = [simpleResponses, richResponse];
