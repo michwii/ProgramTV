@@ -48,7 +48,7 @@ var getTVPrograms = (startingTime, channel, callback) => {
     request = request.where('channel').equals(channel);
   }
   request = request.sort('order');
-  request = request.limit(6);
+  request = request.limit(9);
   request.exec(callback);
 
 };
